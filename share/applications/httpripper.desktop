@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Name=HTTP Ripper
+GenericName=HTTP Ripper
+Comment=A generic ripper for the web
+Icon=httpripper
+Type=Application
+Categories=Application;Network;
+Terminal=false
+Exec=httpripper

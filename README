@@ -1,0 +1,45 @@
+=================
+httpripper Manual
+=================
+
+About
+=====
+HTTP Ripper is a generic ripper for the web
+It is free software licensed under the terms of the GNU General Public License 3
+or later.
+
+Generic Installation
+====================
+To install use you need to have the following libraries installed:
+* Python 2.5
+* PyGTK >= 2.10
+Normally these libraries are already installed on your system.
+
+Usage
+=====
+For information on how to use httpripper please visit the website.
+
+To install httpripper execute: ``python setup.py install`` as superuser (root).
+
+Hacking
+=======
+If you want to hack on httpripper just clone my git repository::
+(needs git 1.5.3 or newer!)
+
+    $ git clone http://29a.ch/git/httpripper
+    $ cd httpripper
+    $ git submodules init
+    $ git submodules update
+    $ hack...
+    $ git diff > myfeature.patch
+
+If you have any questions or a patch just drop me a mail.
+
+Bugreports / Questions
+======================
+If you encounter any bugs in httpproxy or have suggestions or just want to
+thank me - I would like to hear about it!
+
+Contact
+=======
+You can reach my by e-mail: veers at gmx dot ch
