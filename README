@@ -15,11 +15,11 @@ To install use you need to have the following libraries installed:
 * PyGTK >= 2.10
 Normally these libraries are already installed on your system.
 
+To install httpripper execute: ``python setup.py install`` as superuser (root). If you are using a gnome based system like ubuntu you can just doubleclick ``install.sh`` and select run.
+
 Usage
 =====
 For information on how to use httpripper please visit the website.
-
-To install httpripper execute: ``python setup.py install`` as superuser (root).
 
 Hacking
 =======

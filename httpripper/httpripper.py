@@ -2,7 +2,9 @@ import datetime
 import shutil
 import threading
 import os
+import time
 from os import path
+import sys
 
 import logging
 
@@ -15,7 +17,7 @@ import prox as proxpy
 
 NAME = "HTTPRipper"
 VERSION = "0.1"
-WEBSITE = "http://ripper.29a.ch/"
+WEBSITE = "http://29a.ch/httpripper/"
 PORT = 8080
 
 def _(s):
@@ -130,8 +132,8 @@ class MainWindow(gtk.Window):
 #        about.set_comments("")
         about.set_authors(["Jonas Wagner"])
         about.set_copyright("Copyright (c) 2008 Jonas Wagner")
-        about.set_website("http://www.29a.ch/")
-        about.set_website_label("http://29a.ch/")
+        about.set_website(WEBSITE)
+        about.set_website_label(WEBSITE)
         about.set_license("""
 Copyright (C) 2008 Jonas Wagner
 This program is free software; you can redistribute it and/or modify
@@ -162,7 +164,13 @@ class HTTPProxyServer(proxpy.HTTPProxyServer, threading.Thread):
 
 def main():
     logging.basicConfig(level=logging.DEBUG)
-    gtk.gdk.threads_init()
+    if sys.platform == "win32":
+        def release_gil_on_stupid_operating_system():
+            time.sleep(0.001)
+            return True
+        gobject.timeout_add(25, release_gil_on_stupid_operating_system)
+    else:
+        gtk.gdk.threads_init()
     win = MainWindow()
     win.show_all()
     gtk.main()

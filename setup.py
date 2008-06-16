@@ -13,6 +13,9 @@ def ls_r(dir):
         return a
     return reduce(do_reduce, os.walk(dir), [])
 
+if len(sys.argv) == 1:
+    sys.argv.append("install")
+
 kwargs = {
       'name': 'httpripper',
       'version': "0.1.0",
@@ -43,9 +46,9 @@ kwargs = {
 
 try:
     import py2exe
-    kwargs['windows'] = [{'script': 'gcoherence.py',
-          'icon_resources': [(1, 'gcoherence.ico')],
-          'dest_base': 'gcoherence'}]
+    kwargs['windows'] = [{'script': 'bin/httpripper',
+          'icon_resources': [(1, 'httpripper.ico')],
+          'dest_base': 'httpripper'}]
 except ImportError:
     pass
 

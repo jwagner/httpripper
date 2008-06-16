@@ -53,8 +53,14 @@ class HTTPProxyHandler(SocketServer.StreamRequestHandler):
             f.write(data)
             f.write("\r\n")
         if self.server.record:
-            data = tempfile.NamedTemporaryFile(prefix="proxpy-")
-            data.close_called = True
+            if sys.platform.startswith("win"):
+                # screw windows
+                name = tempfile.mktemp(prefix="proxpy-")
+                data = open(name, "wb")
+                data.name = name
+            else:
+                data = tempfile.NamedTemporaryFile(prefix="proxpy-")
+                data.close_called = True
         # pass response headers
         for line in f:
             logger.debug("passig response header %r", line)
@@ -79,7 +85,7 @@ class HTTPProxyHandler(SocketServer.StreamRequestHandler):
 
 class HTTPProxyServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     allow_reuse_address = True
-    daemon_threads = False
+    daemon_threads = True
     def __init__(self, addr):
         self.record = False
         SocketServer.TCPServer.__init__(self, addr, HTTPProxyHandler)
