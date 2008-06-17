@@ -3,6 +3,7 @@ import urllib2
 from datetime import datetime
 from os import path
 import shutil
+import sys
 from urlparse import urlparse
 import socket
 import tempfile
