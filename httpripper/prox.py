@@ -1,18 +1,20 @@
-import SocketServer
-import urllib2
+import atexit
 from datetime import datetime
 from os import path
+import SocketServer
 import shutil
 import sys
-from urlparse import urlparse
 import socket
 import tempfile
+import urllib2
+from urlparse import urlparse
 
 
 import logging
 logger = logging
 
 socket.setdefaulttimeout(30)
+
 
 class HTTPProxyHandler(SocketServer.StreamRequestHandler):
     def handle(self):
@@ -56,11 +58,11 @@ class HTTPProxyHandler(SocketServer.StreamRequestHandler):
         if self.server.record:
             if sys.platform.startswith("win"):
                 # screw windows
-                name = tempfile.mktemp(prefix="proxpy-")
+                name = tempfile.mktemp(prefix="proxpy-", dir=self.server.tempdir)
                 data = open(name, "wb")
                 data.name = name
             else:
-                data = tempfile.NamedTemporaryFile(prefix="proxpy-")
+                data = tempfile.NamedTemporaryFile(prefix="proxpy-", dir=self.server.tempdir)
                 data.close_called = True
         # pass response headers
         for line in f:
@@ -87,7 +89,10 @@ class HTTPProxyHandler(SocketServer.StreamRequestHandler):
 class HTTPProxyServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     allow_reuse_address = True
     daemon_threads = True
+
     def __init__(self, addr):
+        self.tempdir = tempfile.mkdtemp(prefix="proxpy")
+        atexit.register(shutil.rmtree, self.tempdir)
         self.record = False
         SocketServer.TCPServer.__init__(self, addr, HTTPProxyHandler)
 

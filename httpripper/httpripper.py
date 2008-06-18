@@ -8,7 +8,11 @@ import sys
 
 import logging
 
+import locale
+locale.setlocale(locale.LC_ALL, 'en_US')
+
 import gtk, gobject
+
 from x29a import mygtk
 from x29a.utils import byteformat
 mygtk.register_webbrowser_url_hook()
@@ -40,8 +44,9 @@ class MainWindow(gtk.Window):
         self.info = gtk.Label(_("HTTPRipper is running on localhost: %i") % PORT)
         self.vbox.pack_start(self.info, False, False)
 
-        self.model = mygtk.ListStore(date=str, url=str, size=str, path=str, icon=str)
+        self.model = mygtk.ListStore(date=str, url=str, size=int, path=str, icon=str)
         self.treeview = gtk.TreeView(self.model)
+        self.treeview.set_rules_hint(True)
         self.treeview.connect("row-activated", self.save_file)
         self.treeview.set_search_column(self.model.columns.url)
         col = self.treeview.insert_column_with_attributes(0, _("Time"),
@@ -93,7 +98,8 @@ class MainWindow(gtk.Window):
         row = self.model.get_iter(treepath)
         filepath = self.model.get_value(row, self.model.columns.path)
         url = self.model.get_value(row, self.model.columns.url)
-        name = path.basename(url)
+        # might break on windows?
+        name = path.basename(url).split("?")[0]
         dialog = gtk.FileChooserDialog(title="Save As", parent=self, action=gtk.FILE_CHOOSER_ACTION_SAVE,
                 buttons=(
                     "Cancel", gtk.RESPONSE_CANCEL,
@@ -126,6 +132,7 @@ class MainWindow(gtk.Window):
 
     def about(self, sender):
         about = gtk.AboutDialog()
+        about.set_transient_for(self)
         about.set_logo(mygtk.iconfactory.get_icon("httpripper", 128))
         about.set_name(NAME)
         about.set_version(VERSION)

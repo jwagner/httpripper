@@ -28,8 +28,8 @@ If you want to hack on httpripper just clone my git repository::
 
     $ git clone http://29a.ch/git/httpripper
     $ cd httpripper
-    $ git submodules init
-    $ git submodules update
+    $ git submodule init
+    $ git submodule update
     $ hack...
     $ git diff > myfeature.patch
 
