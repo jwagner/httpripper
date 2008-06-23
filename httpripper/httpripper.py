@@ -1,6 +1,30 @@
+"""
+Author: Jonas Wagner
+Version: 0.1
+Last Change: 2008-06-23
+
+HTTPRipper a generic ripper for the web
+Copyright (C) 2008 Jonas Wagner
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+
 import datetime
 import shutil
 import threading
+import SocketServer
+import tempfile
 import os
 import time
 from os import path
@@ -9,7 +33,7 @@ import sys
 import logging
 
 import locale
-locale.setlocale(locale.LC_ALL, 'en_US')
+locale.setlocale(locale.LC_ALL, 'en_US.utf8')
 
 import gtk, gobject
 
@@ -22,7 +46,7 @@ import prox as proxpy
 NAME = "HTTPRipper"
 VERSION = "0.1"
 WEBSITE = "http://29a.ch/httpripper/"
-PORT = 8080
+PORT = 32845
 
 def _(s):
     return s
@@ -60,7 +84,7 @@ class MainWindow(gtk.Window):
                 gtk.CellRendererText(), text=self.model.columns.url)
         col.set_expand(True)
         col.set_sort_column_id(self.model.columns.url)
-        col = self.treeview.insert_column_with_attributes(3, "",
+        col = self.treeview.insert_column_with_attributes(0, "",
                 gtk.CellRendererPixbuf(), **({"icon_name": self.model.columns.icon}))
         self.vbox.pack_start(mygtk.scrolled(self.treeview))
 
@@ -85,12 +109,13 @@ class MainWindow(gtk.Window):
         self.buttonbox.pack_start(self.button_about)
 
         self.connect("destroy", self.clear)
+        self.connect("destroy", lambda *args: self.server.shutdown())
         self.connect("destroy", gtk.main_quit)
 
     def save(self, sender):
         try:
             treepath = self.treeview.get_selection().get_selected_rows()[1][0]
-        except IndexError, AttributeError:
+        except (IndexError, AttributeError):
             return
         self.save_file(self.treeview, treepath, None)
 
@@ -156,15 +181,42 @@ GNU General Public License for more details.
         about.run()
         about.destroy()
 
-class HTTPProxyServer(proxpy.HTTPProxyServer, threading.Thread):
+class Tee(object):
+    def __init__(self, f1, f2):
+        self.f1 = f1
+        self.f2 = f2
+
+    def write(self, data):
+        self.f1.write(data)
+        self.f2.write(data)
+
+class HTTPProxyHandler(proxpy.HTTPProxyHandler):
+    def forward_response_body(self, f1, f2, contentlength):
+        if self.server.record:
+            fd, name = tempfile.mkstemp()
+            f3 = os.fdopen(fd, "w+b", 0)
+            f2 = Tee(f2, f3)
+        self.forward(f1, f2, contentlength)
+        if self.server.record:
+            self.server.on_new_file(self.url, name)
+
+class HTTPProxyServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer, threading.Thread):
+    allow_reuse_address = True
+    daemon_threads = True
+
     def __init__(self, mainwin):
-        self.mainwin = mainwin
+        self.tempdir = tempfile.mkdtemp(prefix="proxpy")
+        self.record = False
         threading.Thread.__init__(self)
         self.setDaemon(True)
-        proxpy.HTTPProxyServer.__init__(self, ("localhost", 8080))
+        self.mainwin = mainwin
+        SocketServer.TCPServer.__init__(self, ("127.0.0.1", PORT), HTTPProxyHandler)
 
     def run(self):
         self.serve_forever()
+
+    def shutdown(self):
+        shutil.rmtree(self.tempdir)
 
     def on_new_file(self, url, path):
         gobject.idle_add(self.mainwin.new_file, url, path)

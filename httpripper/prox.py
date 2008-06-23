@@ -1,3 +1,26 @@
+"""
+A http proxy based on the SocketServer Module
+Author: Jonas Wagner
+Version: 0.1
+Last Change: 2008-06-23
+
+HTTPRipper a generic ripper for the web
+Copyright (C) 2008 Jonas Wagner
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+
 import atexit
 from datetime import datetime
 from os import path
@@ -17,87 +40,94 @@ socket.setdefaulttimeout(30)
 
 
 class HTTPProxyHandler(SocketServer.StreamRequestHandler):
-    def handle(self):
-        # that function is a bit nasty and complex and should be refactored..
-        # parse request
-        request = self.rfile.readline().strip()
+    def parse_request(self):
+        """parse a request line"""
+        request = ""
+        while not request:
+            request = self.rfile.readline().strip()
         logger.debug("request %r", request)
         method, rawurl, version = request.split(" ")
-        url = urlparse(rawurl)
-        # open socket
-        logger.debug("opening socket")
+        return method, rawurl, version
+
+    def parse_header(self, f):
+        """read the httpheaders from the file like f into a dictionary"""
+        logger.debug("processing headers")
+        headers = {}
+        for line in f:
+            if not line.strip():
+                break
+            key, value = line.split(": ", 1)
+            headers[key] = value.strip()
+        return headers
+
+    def write_headers(self, f, headers):
+        """
+        Forward the dictionary containing httpheaders *headers*
+        to the file f. Writes a newline at the end.
+        """
+        logger.debug("forwarding headers %r", headers)
+        for item in headers.items():
+            if not item[0].startswith("Proxy-"):
+                f.write("%s: %s\r\n" % item)
+        f.write("\r\n")
+
+    def forward(self, f1, f2, maxlen=0):
+        """forward maxlen bytes from f1 to f2"""
+        logger.debug("forwarding %r bytes", maxlen)
+        left = maxlen or 1000000000
+        while left:
+            data = f1.read(min(left, 1024))
+            if not data:
+                break
+            f2.write(data)
+            left -= len(data)
+
+    forward_request_body = forward
+    forward_response_body = forward
+
+    def request_url(self, method, url):
+        """create a new socket and write the requestline"""
+        url = urlparse(url)
+        request = "%s %s%s HTTP/1.0\r\n" % (method, url.path or "/",
+                url.query and "?" + url.query or "")
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((url.hostname, int(url.port or 80)))
-        # send request
-        new_request = "%s %s?%s HTTP/1.0\r\n" % (method, url.path or "/", url.query)
-        logger.debug("sending request %r", new_request)
-        s.sendall(new_request)
-        f = s.makefile("rw", 0)
-        # forward headers
-        logger.debug("processing headers")
-        clen = 0
-        for line in self.rfile:
-            if not line.strip():
-                break
-            key, value = line.split(":", 1)
-            if line.startswith("Connection:") or line.startswith("Proxy-") or line.startswith("Keep-Alive"):
-                continue
-            if key == "Content-Length":
-                clen = int(value)
-                logging.info("Got Content-Length: %r", clen)
-            logger.debug("forwarding header %r", line)
-            s.sendall(line)
-        s.sendall("Connection: close\r\n\r\n")
-        # send post data?
-        if method == "POST":
-            logger.debug("getting post data")
-            data = self.rfile.read(clen)
-            logger.debug("sending POST data %r", data)
-            f.write(data)
-            f.write("\r\n")
-        if self.server.record:
-            if sys.platform.startswith("win"):
-                # screw windows
-                name = tempfile.mktemp(prefix="proxpy-", dir=self.server.tempdir)
-                data = open(name, "wb")
-                data.name = name
-            else:
-                data = tempfile.NamedTemporaryFile(prefix="proxpy-", dir=self.server.tempdir)
-                data.close_called = True
-        # pass response headers
-        for line in f:
-            logger.debug("passig response header %r", line)
-            self.wfile.write(line)
-            if not line.strip():
-                break
-        logger.debug("passing request body")
-        while 1:
-            buf = f.read(1024)
-            if not buf:
-                break
-            self.wfile.write(buf)
-            if self.server.record:
-                data.write(buf)
-        if self.server.record:
-            data.file.close()
-            self.server.on_new_file(rawurl, data.name)
-        logger.debug("closing connection")
-        s.close()
-        logger.debug("done")
+        s.sendall(request)
+        return s, s.makefile("rwb", 0)
 
+    def handle(self):
+        """Handle client requests"""
+        while True:
+            method, url, version = self.parse_request()
+            self.url = url
+            requestheaders = self.parse_header(self.rfile)
+#            requestheaders["Connection"] = "close"
+            sock, request = self.request_url(method, url)
+            self.write_headers(request, requestheaders)
+            if method in ("POST", "PUT") and "Content-Length" in requestheaders:
+                self.forward_request_body(self.rfile, request,
+                        int(requestheaders["Content-Length"]))
+            # forward status line
+            self.wfile.write(request.readline())
+            responseheaders = self.parse_header(request)
+            self.write_headers(self.wfile, responseheaders)
+            try:
+                clen = int(responseheaders.get("Content-Length"))
+            except (KeyError, TypeError):
+                clen = None
+            self.forward_response_body(request, self.wfile, clen)
+            request.close()
+            sock.close()
+            if requestheaders.get("Proxy-Connection") != "keep-alive":
+                break
+            break
 
 class HTTPProxyServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     allow_reuse_address = True
     daemon_threads = True
 
     def __init__(self, addr):
-        self.tempdir = tempfile.mkdtemp(prefix="proxpy")
-        atexit.register(shutil.rmtree, self.tempdir)
-        self.record = False
         SocketServer.TCPServer.__init__(self, addr, HTTPProxyHandler)
-
-    def on_new_file(self, url, path):
-        print "new file", url, path
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
