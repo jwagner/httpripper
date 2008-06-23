@@ -65,10 +65,11 @@ class MainWindow(gtk.Window):
         self.set_default_size(600, 600)
         self.vbox = gtk.VBox()
         self.add(self.vbox)
-        self.info = gtk.Label(_("HTTPRipper is running on localhost: %i") % PORT)
+        self.info = gtk.Label(
+                _("HTTPRipper is running on localhost: %i") % PORT)
         self.vbox.pack_start(self.info, False, False)
-
-        self.model = mygtk.ListStore(date=str, url=str, size=int, path=str, icon=str)
+        self.model = mygtk.ListStore(date=str, url=str, size=int, path=str,
+                icon=str)
         self.treeview = gtk.TreeView(self.model)
         self.treeview.set_rules_hint(True)
         self.treeview.connect("row-activated", self.save_file)
@@ -85,7 +86,8 @@ class MainWindow(gtk.Window):
         col.set_expand(True)
         col.set_sort_column_id(self.model.columns.url)
         col = self.treeview.insert_column_with_attributes(0, "",
-                gtk.CellRendererPixbuf(), **({"icon_name": self.model.columns.icon}))
+                gtk.CellRendererPixbuf(),
+                **({"icon_name": self.model.columns.icon}))
         self.vbox.pack_start(mygtk.scrolled(self.treeview))
 
         self.buttonbox = gtk.HButtonBox()
@@ -125,7 +127,10 @@ class MainWindow(gtk.Window):
         url = self.model.get_value(row, self.model.columns.url)
         # might break on windows?
         name = path.basename(url).split("?")[0]
-        dialog = gtk.FileChooserDialog(title="Save As", parent=self, action=gtk.FILE_CHOOSER_ACTION_SAVE,
+        dialog = gtk.FileChooserDialog(
+                title="Save As",
+                parent=self,
+                action=gtk.FILE_CHOOSER_ACTION_SAVE,
                 buttons=(
                     "Cancel", gtk.RESPONSE_CANCEL,
                     "Save", gtk.RESPONSE_OK
@@ -200,7 +205,8 @@ class HTTPProxyHandler(proxpy.HTTPProxyHandler):
         if self.server.record:
             self.server.on_new_file(self.url, name)
 
-class HTTPProxyServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer, threading.Thread):
+class HTTPProxyServer(SocketServer.ThreadingMixIn,
+        SocketServer.TCPServer, threading.Thread):
     allow_reuse_address = True
     daemon_threads = True
 
@@ -210,7 +216,8 @@ class HTTPProxyServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer, threa
         threading.Thread.__init__(self)
         self.setDaemon(True)
         self.mainwin = mainwin
-        SocketServer.TCPServer.__init__(self, ("127.0.0.1", PORT), HTTPProxyHandler)
+        SocketServer.TCPServer.__init__(self, ("127.0.0.1", PORT),
+                HTTPProxyHandler)
 
     def run(self):
         self.serve_forever()
@@ -218,13 +225,14 @@ class HTTPProxyServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer, threa
     def shutdown(self):
         shutil.rmtree(self.tempdir)
 
-    def on_new_file(self, url, path):
-        gobject.idle_add(self.mainwin.new_file, url, path)
+    def on_new_file(self, url, filepath):
+        gobject.idle_add(self.mainwin.new_file, url, filepath)
 
 def main():
     logging.basicConfig(level=logging.DEBUG)
     if sys.platform == "win32":
         def release_gil_on_stupid_operating_system():
+            """fix for a stupid problem with threads and gtk on windows!"""
             time.sleep(0.001)
             return True
         gobject.timeout_add(25, release_gil_on_stupid_operating_system)

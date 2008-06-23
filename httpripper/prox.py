@@ -21,15 +21,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import atexit
-from datetime import datetime
-from os import path
 import SocketServer
-import shutil
-import sys
 import socket
-import tempfile
-import urllib2
 from urlparse import urlparse
 
 
@@ -132,6 +125,5 @@ class HTTPProxyServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     server = HTTPProxyServer(("localhost", 8080))
-    server.record = True
     server.serve_forever()
 
