@@ -198,7 +198,7 @@ class Tee(object):
 class HTTPProxyHandler(proxpy.HTTPProxyHandler):
     def forward_response_body(self, f1, f2, contentlength):
         if self.server.record:
-            fd, name = tempfile.mkstemp()
+            fd, name = tempfile.mkstemp(dir=self.server.tempdir)
             f3 = os.fdopen(fd, "w+b", 0)
             f2 = Tee(f2, f3)
         self.forward(f1, f2, contentlength)
@@ -243,4 +243,5 @@ def main():
     gtk.main()
 
 if __name__ == "__main__":
+
     main()
