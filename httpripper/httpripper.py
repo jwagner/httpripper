@@ -35,7 +35,19 @@ import sys
 import logging
 
 import locale
-locale.setlocale(locale.LC_ALL, 'en_US.utf8')
+
+for lang in "en_US.utf8", "en", "":
+    try:
+        locale.setlocale(locale.LC_ALL, lang)
+        break
+    except locale.Error:
+        pass
+
+try:
+    __file__
+except NameError:
+    # frozen
+    sys.stderr.write = lambda *x: None
 
 import gtk, gobject
 
@@ -253,14 +265,16 @@ class HTTPProxyServer(proxpy.HTTPProxyServer, threading.Thread):
         gobject.idle_add(self.mainwin.new_file, url, filepath)
 
 def main():
-    logging.basicConfig(level=logging.DEBUG)
+    level = "DEBUG" in sys.argv and logging.DEBUG or logging.ERROR
     if sys.platform == "win32":
         def release_gil_on_stupid_operating_system():
             """fix for a stupid problem with threads and gtk on windows!"""
             time.sleep(0.001)
             return True
         gobject.timeout_add(25, release_gil_on_stupid_operating_system)
+        logging.basicConfig(filename="httpripper.log", level=level)
     else:
+        logging.basicConfig(level=level)
         gtk.gdk.threads_init()
     win = MainWindow()
     win.show_all()
