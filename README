@@ -19,6 +19,8 @@ To install httpripper execute: ``python setup.py install`` as superuser (root). 
 
 Usage
 =====
+Start HTTPRipper. It will display the hostname/port it's running on.
+Configure your browser to use it as proxy. Hit the record button ;)
 For information on how to use httpripper please visit the website.
 
 Hacking

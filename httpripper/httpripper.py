@@ -27,6 +27,7 @@ import SocketServer
 import socket
 import tempfile
 import os
+from urlparse import urlparse
 import time
 from os import path
 import sys
@@ -151,8 +152,7 @@ class MainWindow(gtk.Window):
         row = self.model.get_iter(treepath)
         filepath = self.model.get_value(row, self.model.columns.path)
         url = self.model.get_value(row, self.model.columns.url)
-        # might break on windows?
-        name = path.basename(url).split("?")[0]
+        name = urlparse(url).path.split("/")[-1]
         dialog = gtk.FileChooserDialog(
                 title="Save As",
                 parent=self,
@@ -247,7 +247,7 @@ class HTTPProxyServer(proxpy.HTTPProxyServer, threading.Thread):
 
     def shutdown(self):
         shutil.rmtree(self.tempdir)
-        SocketServer.shutdown(self)
+        self.socket.close()
 
     def on_new_file(self, url, filepath):
         gobject.idle_add(self.mainwin.new_file, url, filepath)
