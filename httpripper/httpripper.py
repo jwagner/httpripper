@@ -24,6 +24,7 @@ import datetime
 import shutil
 import threading
 import SocketServer
+import socket
 import tempfile
 import os
 import time
@@ -46,7 +47,6 @@ import prox as proxpy
 NAME = "HTTPRipper"
 VERSION = "0.1"
 WEBSITE = "http://29a.ch/httpripper/"
-PORT = 32845
 
 def _(s):
     return s
@@ -58,7 +58,13 @@ def byteformatdatafunc(column, cell, model, treeiter):
 class MainWindow(gtk.Window):
     def __init__(self):
         gtk.Window.__init__(self)
-        self.server = HTTPProxyServer(self)
+        self.port = 8080
+        while True:
+            try:
+                self.server = HTTPProxyServer(self)
+                break
+            except socket.error:
+                self.port += 1
         self.server.start()
         self.set_title(NAME)
         self.set_icon(mygtk.iconfactory.get_icon("httpripper", 32))
@@ -66,12 +72,14 @@ class MainWindow(gtk.Window):
         self.vbox = gtk.VBox()
         self.add(self.vbox)
         self.info = gtk.Label(
-                _("HTTPRipper is running on localhost: %i") % PORT)
+                _("HTTPRipper is running on localhost: %i") % self.port)
         self.vbox.pack_start(self.info, False, False)
         self.model = mygtk.ListStore(date=str, url=str, size=int, path=str,
                 icon=str)
         self.treeview = gtk.TreeView(self.model)
         self.treeview.set_rules_hint(True)
+        #self.treeview.set_fixed_height_mode(True) # makes it a bit faster
+        self.treeview.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
         self.treeview.connect("row-activated", self.save_file)
         self.treeview.set_search_column(self.model.columns.url)
         col = self.treeview.insert_column_with_attributes(0, _("Time"),
@@ -115,11 +123,29 @@ class MainWindow(gtk.Window):
         self.connect("destroy", gtk.main_quit)
 
     def save(self, sender):
-        try:
-            treepath = self.treeview.get_selection().get_selected_rows()[1][0]
-        except (IndexError, AttributeError):
-            return
-        self.save_file(self.treeview, treepath, None)
+        model, rows = self.treeview.get_selection().get_selected_rows()
+        if len(rows) == 1:
+            self.save_file(self.treeview, rows[0], None)
+        elif len(rows) > 1:
+            self.save_files(rows)
+
+    def save_files(self, rows):
+        dialog = gtk.FileChooserDialog(
+                title="Save As",
+                parent=self,
+                action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
+                buttons=(
+                    "Cancel", gtk.RESPONSE_CANCEL,
+                    "Save", gtk.RESPONSE_OK
+                )
+        )
+        if dialog.run() == gtk.RESPONSE_OK:
+            for row in map(self.model.get_iter, rows):
+                filepath = self.model.get_value(row, self.model.columns.path)
+                url = self.model.get_value(row, self.model.columns.url)
+                name = path.basename(url).split("?")[0]
+                shutil.copy(filepath, path.join(dialog.get_filename(), name))
+        dialog.destroy()
 
     def save_file(self, treeview, treepath, view_column):
         row = self.model.get_iter(treepath)
@@ -205,10 +231,7 @@ class HTTPProxyHandler(proxpy.HTTPProxyHandler):
         if self.server.record:
             self.server.on_new_file(self.url, name)
 
-class HTTPProxyServer(SocketServer.ThreadingMixIn,
-        SocketServer.TCPServer, threading.Thread):
-    allow_reuse_address = True
-    daemon_threads = True
+class HTTPProxyServer(proxpy.HTTPProxyServer, threading.Thread):
 
     def __init__(self, mainwin):
         self.tempdir = tempfile.mkdtemp(prefix="proxpy")
@@ -216,7 +239,7 @@ class HTTPProxyServer(SocketServer.ThreadingMixIn,
         threading.Thread.__init__(self)
         self.setDaemon(True)
         self.mainwin = mainwin
-        SocketServer.TCPServer.__init__(self, ("127.0.0.1", PORT),
+        SocketServer.TCPServer.__init__(self, ("127.0.0.1", mainwin.port),
                 HTTPProxyHandler)
 
     def run(self):
@@ -224,6 +247,7 @@ class HTTPProxyServer(SocketServer.ThreadingMixIn,
 
     def shutdown(self):
         shutil.rmtree(self.tempdir)
+        SocketServer.shutdown(self)
 
     def on_new_file(self, url, filepath):
         gobject.idle_add(self.mainwin.new_file, url, filepath)

@@ -78,38 +78,55 @@ class HTTPProxyHandler(SocketServer.StreamRequestHandler):
     forward_request_body = forward
     forward_response_body = forward
 
-    def request_url(self, method, url):
+    def request_url(self, method, rawurl, version):
         """create a new socket and write the requestline"""
-        url = urlparse(url)
-        request = "%s %s%s HTTP/1.0\r\n" % (method, url.path or "/",
-                url.query and "?" + url.query or "")
+        url = urlparse(rawurl)
+        request = "%s %s%s %s\r\n" % (method, url.path or "/",
+                url.query and "?" + url.query or "", version)
+        logging.debug("request_url(%r, %r, %r) request: %r", method, rawurl, version, request)
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         s.connect((url.hostname, int(url.port or 80)))
         s.sendall(request)
         return s, s.makefile("rwb", 0)
 
+    def __repr__(self):
+        return "HTTPProxyRequestHandler(%r)" % self.url
+
     def handle(self):
+        try:
+            self._handle()
+        except:
+            logger.exception("An error occured while handling request %r", self)
+            raise
+
+    def _handle(self):
         """Handle client requests"""
         while True:
             method, url, version = self.parse_request()
             self.url = url
             requestheaders = self.parse_header(self.rfile)
-#            requestheaders["Connection"] = "close"
-            sock, request = self.request_url(method, url)
+            requestheaders["Connection"] = "close"
+            sock, request = self.request_url(method, url, version)
             self.write_headers(request, requestheaders)
             if method in ("POST", "PUT") and "Content-Length" in requestheaders:
                 self.forward_request_body(self.rfile, request,
                         int(requestheaders["Content-Length"]))
+                sock.shutdown(socket.SHUT_WR)
             # forward status line
             self.wfile.write(request.readline())
             responseheaders = self.parse_header(request)
             self.write_headers(self.wfile, responseheaders)
             try:
                 clen = int(responseheaders.get("Content-Length"))
-            except (KeyError, TypeError):
+            except (KeyError, TypeError, ValueError):
                 clen = None
             self.forward_response_body(request, self.wfile, clen)
-            request.close()
+            try:
+                request.close()
+                sock.shutdown(socket.SHUT_RD)
+            except:
+                pass
             sock.close()
             if requestheaders.get("Proxy-Connection") != "keep-alive":
                 break
@@ -118,9 +135,14 @@ class HTTPProxyHandler(SocketServer.StreamRequestHandler):
 class HTTPProxyServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     allow_reuse_address = True
     daemon_threads = True
+    timeout = 60
+    request_queue_size = 10
 
     def __init__(self, addr):
         SocketServer.TCPServer.__init__(self, addr, HTTPProxyHandler)
+
+    def handle_error(self, request, addr):
+        pass
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
