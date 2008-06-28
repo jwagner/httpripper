@@ -23,6 +23,11 @@ Start HTTPRipper. It will display the hostname/port it's running on.
 Configure your browser to use it as proxy. Hit the record button ;)
 For information on how to use httpripper please visit the website.
 
+Recommendations
+===============
+Tired of manually switching proxies? Use use a proxyswitcher
+like (http://foxyproxy.mozdev.org/). 
+
 Hacking
 =======
 If you want to hack on httpripper just clone my git repository::
