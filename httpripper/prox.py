@@ -105,20 +105,20 @@ class HTTPProxyHandler(SocketServer.StreamRequestHandler):
         while True:
             method, url, version = self.parse_request()
             self.url = url
-            requestheaders = self.parse_header(self.rfile)
-            requestheaders["Connection"] = "close"
+            self.requestheaders = self.parse_header(self.rfile)
+            self.requestheaders["Connection"] = "close"
             sock, request = self.request_url(method, url, version)
-            self.write_headers(request, requestheaders)
-            if method in ("POST", "PUT") and "Content-Length" in requestheaders:
+            self.write_headers(request, self.requestheaders)
+            if method in ("POST", "PUT") and "Content-Length" in self.requestheaders:
                 self.forward_request_body(self.rfile, request,
-                        int(requestheaders["Content-Length"]))
+                        int(self.requestheaders["Content-Length"]))
                 sock.shutdown(socket.SHUT_WR)
             # forward status line
             self.wfile.write(request.readline())
-            responseheaders = self.parse_header(request)
-            self.write_headers(self.wfile, responseheaders)
+            self.responseheaders = self.parse_header(request)
+            self.write_headers(self.wfile, self.responseheaders)
             try:
-                clen = int(responseheaders.get("Content-Length"))
+                clen = int(self.responseheaders.get("Content-Length"))
             except (KeyError, TypeError, ValueError):
                 clen = None
             self.forward_response_body(request, self.wfile, clen)

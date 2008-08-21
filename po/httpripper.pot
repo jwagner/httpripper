@@ -1,0 +1,54 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2008-08-20 16:44+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../httpripper/httpripper.py:95
+#, python-format
+msgid "HTTPRipper is running on localhost: %i"
+msgstr ""
+
+#: ../httpripper/httpripper.py:108
+msgid "Time"
+msgstr ""
+
+#: ../httpripper/httpripper.py:112
+msgid "Size"
+msgstr ""
+
+#: ../httpripper/httpripper.py:117
+msgid "Content-Type"
+msgstr ""
+
+#: ../httpripper/httpripper.py:121
+msgid "URL"
+msgstr ""
+
+#: ../httpripper/httpripper.py:165 ../httpripper/httpripper.py:188
+msgid "Save As"
+msgstr ""
+
+#: ../httpripper/httpripper.py:169 ../httpripper/httpripper.py:192
+msgid "Cancel"
+msgstr ""
+
+#: ../httpripper/httpripper.py:170 ../httpripper/httpripper.py:193
+msgid "Save"
+msgstr ""
+
+#: ../httpripper/httpripper.py:232
+msgid "translator-credits"
+msgstr ""
