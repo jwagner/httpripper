@@ -13,13 +13,10 @@ def ls_r(dir):
         return a
     return reduce(do_reduce, os.walk(dir), [])
 
-if len(sys.argv) == 1:
-    sys.argv.append("install")
-
 kwargs = {
       'name': 'httpripper',
       'version': "0.1.0",
-      'description': 'A generic ripper for the web',
+      'description': 'A generic ripper for the web implemented as a http proxy',
       'author': 'Jonas Wagner',
       'author_email': 'veers@gmx.ch',
       'url': 'http://29a.ch/httpripper/',

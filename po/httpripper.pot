@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-08-20 16:44+0200\n"
+"POT-Creation-Date: 2008-08-21 13:07+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,39 +16,67 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../httpripper/httpripper.py:95
+#: ../httpripper/httpripper.py:85
+msgid "Any"
+msgstr ""
+
+#: ../httpripper/httpripper.py:86
+msgid "Audio"
+msgstr ""
+
+#: ../httpripper/httpripper.py:87
+msgid "Image"
+msgstr ""
+
+#: ../httpripper/httpripper.py:88
+msgid "Video"
+msgstr ""
+
+#: ../httpripper/httpripper.py:127
 #, python-format
 msgid "HTTPRipper is running on localhost: %i"
 msgstr ""
 
-#: ../httpripper/httpripper.py:108
+#: ../httpripper/httpripper.py:140
 msgid "Time"
 msgstr ""
 
-#: ../httpripper/httpripper.py:112
+#: ../httpripper/httpripper.py:144 ../httpripper/httpripper.py:175
 msgid "Size"
 msgstr ""
 
-#: ../httpripper/httpripper.py:117
+#: ../httpripper/httpripper.py:150 ../httpripper/httpripper.py:174
 msgid "Content-Type"
 msgstr ""
 
-#: ../httpripper/httpripper.py:121
+#: ../httpripper/httpripper.py:156
 msgid "URL"
 msgstr ""
 
-#: ../httpripper/httpripper.py:165 ../httpripper/httpripper.py:188
+#: ../httpripper/httpripper.py:171
+msgid "Filter"
+msgstr ""
+
+#: ../httpripper/httpripper.py:174
+msgid "is"
+msgstr ""
+
+#: ../httpripper/httpripper.py:175
+msgid "at least (KiB)"
+msgstr ""
+
+#: ../httpripper/httpripper.py:213 ../httpripper/httpripper.py:236
 msgid "Save As"
 msgstr ""
 
-#: ../httpripper/httpripper.py:169 ../httpripper/httpripper.py:192
+#: ../httpripper/httpripper.py:217 ../httpripper/httpripper.py:240
 msgid "Cancel"
 msgstr ""
 
-#: ../httpripper/httpripper.py:170 ../httpripper/httpripper.py:193
+#: ../httpripper/httpripper.py:218 ../httpripper/httpripper.py:241
 msgid "Save"
 msgstr ""
 
-#: ../httpripper/httpripper.py:232
+#: ../httpripper/httpripper.py:293
 msgid "translator-credits"
 msgstr ""

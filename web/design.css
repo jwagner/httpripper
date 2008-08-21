@@ -32,9 +32,25 @@ a img { border: 2px solid white; -moz-border-radius: 2px; }
     width: 624px;
 }
 
+.msgbox {
+    padding: 5px;
+    text-align: center;
+    border: 2px solid white;
+    background-color: #b7dbf5;
+    margin-top: 12px;
+}
+
 div.content {
     padding-left: 40px;
-padding-right: 40px;
+    padding-right: 40px;
+}
+
+.menu {
+    list-style-type: none;
+}
+
+.menu li:before {
+    content: "»  ";
 }
 
 #title {

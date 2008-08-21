@@ -1,43 +1,71 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-08-20 16:44+0200\n"
+"POT-Creation-Date: 2008-08-21 13:07+0200\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../httpripper/httpripper.py:95
+#: ../httpripper/httpripper.py:85
+msgid "Any"
+msgstr "Alle"
+
+#: ../httpripper/httpripper.py:86
+msgid "Audio"
+msgstr "Audio"
+
+#: ../httpripper/httpripper.py:87
+msgid "Image"
+msgstr "Bild"
+
+#: ../httpripper/httpripper.py:88
+msgid "Video"
+msgstr "Video"
+
+#: ../httpripper/httpripper.py:127
 #, python-format
 msgid "HTTPRipper is running on localhost: %i"
 msgstr "HTTPRipper läuft auf localhost: %i"
 
-#: ../httpripper/httpripper.py:108
+#: ../httpripper/httpripper.py:140
 msgid "Time"
 msgstr "Zeit"
 
-#: ../httpripper/httpripper.py:112
+#: ../httpripper/httpripper.py:144 ../httpripper/httpripper.py:175
 msgid "Size"
 msgstr "Grösse"
 
-#: ../httpripper/httpripper.py:117
+#: ../httpripper/httpripper.py:150 ../httpripper/httpripper.py:174
 msgid "Content-Type"
 msgstr "Content-Type"
 
-#: ../httpripper/httpripper.py:121
+#: ../httpripper/httpripper.py:156
 msgid "URL"
 msgstr "URL"
 
-#: ../httpripper/httpripper.py:165 ../httpripper/httpripper.py:188
+#: ../httpripper/httpripper.py:171
+msgid "Filter"
+msgstr "Filter"
+
+#: ../httpripper/httpripper.py:174
+msgid "is"
+msgstr "ist"
+
+#: ../httpripper/httpripper.py:175
+msgid "at least (KiB)"
+msgstr "ist mindestens (KiB)"
+
+#: ../httpripper/httpripper.py:213 ../httpripper/httpripper.py:236
 msgid "Save As"
 msgstr "Speichern unter"
 
-#: ../httpripper/httpripper.py:169 ../httpripper/httpripper.py:192
+#: ../httpripper/httpripper.py:217 ../httpripper/httpripper.py:240
 msgid "Cancel"
 msgstr "Abbrechen"
 
-#: ../httpripper/httpripper.py:170 ../httpripper/httpripper.py:193
+#: ../httpripper/httpripper.py:218 ../httpripper/httpripper.py:241
 msgid "Save"
 msgstr "Speichern"
 
-#: ../httpripper/httpripper.py:232
+#: ../httpripper/httpripper.py:293
 msgid "translator-credits"
 msgstr "Jonas Wagner"

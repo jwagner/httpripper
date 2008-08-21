@@ -52,7 +52,7 @@ gettext.translation('httpripper', LOCALE_PATH,
         languages=LANGUAGES, fallback = True).install(unicode=1)
 
 
-import gtk, gobject
+import gtk, gobject, pango
 
 from x29a import mygtk
 from x29a.utils import byteformat
@@ -66,14 +66,45 @@ except NameError:
     # frozen
     sys.stderr.write = lambda *x: None
 
-
 NAME = "HTTPRipper"
 VERSION = "1.0"
 WEBSITE = "http://29a.ch/httpripper/"
 
+def llabel(s):
+    l = gtk.Label(s)
+    l.set_property("xalign", 0.0)
+    return l
+
 def byteformatdatafunc(column, cell, model, treeiter):
     n = int(cell.get_property('text'))
     cell.set_property('text', byteformat(n))
+
+class ContentTypeFilter(gtk.ComboBox):
+    content_types = [
+            ("text-x-generic", _("Any"), ""),
+            ("audio-x-generic", _("Audio"), "audio"),
+            ("image-x-generic", _("Image"), "image"),
+            ("video-x-generic", _("Video"), "video"),
+    ]
+    def __init__(self):
+        self.model = mygtk.ListStore(icon=gtk.gdk.Pixbuf, name=str, prefix=str)
+        for icon, name, prefix in self.content_types:
+            self.model.append(icon=mygtk.iconfactory.get_icon(icon, 16), name=name, prefix=prefix)
+        gtk.ComboBox.__init__(self, self.model)
+        pixbuf_cell = gtk.CellRendererPixbuf()
+        self.pack_start(pixbuf_cell, False)
+        self.add_attribute(pixbuf_cell, 'pixbuf', self.model.columns.icon)
+        text_cell = gtk.CellRendererText()
+        self.pack_start(text_cell, True)
+        self.add_attribute(text_cell, 'text', self.model.columns.name)
+        self.set_active(0)
+
+    @property
+    def prefix(self):
+        i = self.get_active()
+        return self.model.get_value(self.model.get_iter(self.get_active()),
+                self.model. columns.prefix)
+
 
 class MainWindow(gtk.Window):
     def __init__(self):
@@ -98,7 +129,8 @@ class MainWindow(gtk.Window):
                 icon=str, content_type=str)
         self.model_filtered = self.model.filter_new()
         self.model_filtered.set_visible_func(self.row_visible)
-        self.treeview = gtk.TreeView(self.model_filtered)
+        self.model_sort = gtk.TreeModelSort(self.model_filtered)
+        self.treeview = gtk.TreeView(self.model_sort)
         self.treeview.set_rules_hint(True)
         #self.treeview.set_fixed_height_mode(True) # makes it a bit faster
         self.treeview.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
@@ -113,8 +145,11 @@ class MainWindow(gtk.Window):
         col.set_cell_data_func(col.get_cell_renderers()[0], byteformatdatafunc)
         col.set_sort_column_id(self.model.columns.size)
 
+        renderer = gtk.CellRendererText()
         col = self.treeview.insert_column_with_attributes(2, _("Content-Type"),
-                gtk.CellRendererText(), text=self.model.columns.content_type)
+                renderer, text=self.model.columns.content_type)
+        renderer.set_property("ellipsize", pango.ELLIPSIZE_END)
+        renderer.set_property("width", 100)
         col.set_sort_column_id(self.model.columns.content_type)
 
         col = self.treeview.insert_column_with_attributes(3, _("URL"),
@@ -127,6 +162,19 @@ class MainWindow(gtk.Window):
                 **({"icon_name": self.model.columns.icon}))
 
         self.vbox.pack_start(mygtk.scrolled(self.treeview))
+
+        self.filter_content_type = ContentTypeFilter()
+        self.filter_size = gtk.Entry()
+        self.filter_size.connect("changed", lambda entry: self.model_filtered.refilter())
+        self.filter_content_type.connect("changed", lambda combobox: self.model_filtered.refilter())
+        self.filter_expander = gtk.Expander(label=_("Filter"))
+        self.filter_expander.add(
+                mygtk.make_table([
+                    (llabel(_("Content-Type")), llabel(_("is")), self.filter_content_type),
+                    (llabel(_("Size")), llabel(_("at least (KiB)")), self.filter_size),
+                ])
+        )
+        self.vbox.pack_start(self.filter_expander, False, False)
 
         self.buttonbox = gtk.HButtonBox()
         self.vbox.pack_end(self.buttonbox, False, False)
@@ -157,16 +205,17 @@ class MainWindow(gtk.Window):
         if len(rows) == 1:
             self.save_file(self.treeview, rows[0], None)
         elif len(rows) > 1:
-            self.save_files(model, rows)
+            self.save_files(rows)
 
-    def save_files(self, model, rows):
+    def save_files(self, rows):
+        model = self.model
         dialog = gtk.FileChooserDialog(
                 title=_("Save As"),
                 parent=self,
                 action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
                 buttons=(
-                    _("Cancel"), gtk.RESPONSE_CANCEL,
-                    _("Save"), gtk.RESPONSE_OK
+                    _("Cancel").encode("utf8"), gtk.RESPONSE_CANCEL,
+                    _("Save").encode("utf8"), gtk.RESPONSE_OK
                 )
         )
         if dialog.run() == gtk.RESPONSE_OK:
@@ -178,18 +227,19 @@ class MainWindow(gtk.Window):
         dialog.destroy()
 
     def save_file(self, treeview, treepath, view_column):
-        model = self.treeview.get_model()
+        model = self.model
         row = model.get_iter(treepath)
         filepath = model.get_value(row, model.columns.path)
         url = model.get_value(row, model.columns.url)
         name = urlparse(url).path.split("/")[-1]
+        #import pdb;pdb.set_trace()
         dialog = gtk.FileChooserDialog(
                 title=_("Save As"),
                 parent=self,
                 action=gtk.FILE_CHOOSER_ACTION_SAVE,
                 buttons=(
-                    _("Cancel"), gtk.RESPONSE_CANCEL,
-                    _("Save"), gtk.RESPONSE_OK
+                    _("Cancel").encode("utf8"), gtk.RESPONSE_CANCEL,
+                    _("Save").encode("utf8"), gtk.RESPONSE_OK
                 )
         )
         dialog.set_current_name(name)
@@ -198,6 +248,19 @@ class MainWindow(gtk.Window):
         dialog.destroy()
 
     def row_visible(self, model, iter_):
+        content_type = self.model.get_value(iter_, self.model.columns.content_type)
+        prefix = self.filter_content_type.prefix
+        if prefix:
+            if not content_type:
+                return False
+            if not content_type.startswith(prefix):
+                return False
+        try:
+            size = int(self.filter_size.get_text())*1024
+        except ValueError:
+            size = 0
+        if size > self.model.get_value(iter_, self.model.columns.size):
+            return False
         return True
 
     def new_file(self, url, filepath, content_type):
@@ -228,7 +291,7 @@ class MainWindow(gtk.Window):
         about.set_version(VERSION)
 #        about.set_comments("")
         about.set_authors(["Jonas Wagner"])
-        dialog.set_translator_credits(_("translator-credits"))
+        about.set_translator_credits(_("translator-credits"))
         about.set_copyright("Copyright (c) 2008 Jonas Wagner")
         about.set_website(WEBSITE)
         about.set_website_label(WEBSITE)

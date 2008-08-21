@@ -128,7 +128,7 @@ class HTTPProxyHandler(SocketServer.StreamRequestHandler):
             except:
                 pass
             sock.close()
-            if requestheaders.get("Proxy-Connection") != "keep-alive":
+            if self.requestheaders.get("Proxy-Connection") != "keep-alive":
                 break
             break
 
