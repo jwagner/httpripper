@@ -41,7 +41,7 @@ locale.setlocale(locale.LC_ALL, "")
 import gettext
 try:
     PREFIX = path.abspath(path.join(path.dirname(sys.modules["__main__"].__file__), os.pardir))
-except NameError:
+except AttributeError:
     # frozen
     PREFIX = path.abspath(".")
 LANGUAGES = [locale.getdefaultlocale()[0] or "en_US", "en_US"]
