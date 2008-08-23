@@ -213,11 +213,10 @@ class MainWindow(gtk.Window):
         if len(rows) == 1:
             self.save_file(self.treeview, rows[0], None)
         elif len(rows) > 1:
-            self.save_files(rows)
+            self.save_files(model, rows)
 
-    def save_files(self, rows):
+    def save_files(self, model, rows):
         """called to save multiple selected files"""
-        model = self.model
         dialog = gtk.FileChooserDialog(
                 title=_("Save As"),
                 parent=self,
@@ -229,18 +228,18 @@ class MainWindow(gtk.Window):
         )
         if dialog.run() == gtk.RESPONSE_OK:
             for row in map(model.get_iter, rows):
-                filepath = model.get_value(row, model.columns.path)
-                url = model.get_value(row, model.columns.url)
+                filepath = model.get_value(row, self.model.columns.path)
+                url = model.get_value(row, self.model.columns.url)
                 name = path.basename(url).split("?")[0]
                 shutil.copy(filepath, path.join(dialog.get_filename(), name))
         dialog.destroy()
 
     def save_file(self, treeview, treepath, view_column):
         """called to save a single file"""
-        model = self.model
+        model = treeview.get_model()
         row = model.get_iter(treepath)
-        filepath = model.get_value(row, model.columns.path)
-        url = model.get_value(row, model.columns.url)
+        filepath = model.get_value(row, self.model.columns.path)
+        url = model.get_value(row, self.model.columns.url)
         name = urlparse(url).path.split("/")[-1]
         dialog = gtk.FileChooserDialog(
                 title=_("Save As"),
