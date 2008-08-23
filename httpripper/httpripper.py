@@ -21,24 +21,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import datetime
-import shutil
-import threading
-import SocketServer
-import socket
-import tempfile
-import os
-from urlparse import urlparse
-import time
-from os import path
-import sys
-
 import logging
+import os
+from os import path
+import shutil
+import socket
+import SocketServer
+import sys
+import tempfile
+import threading
+import time
+from urlparse import urlparse
 
+
+# configure gettext
 import locale
 locale.setlocale(locale.LC_ALL, "")
 
 import gettext
-
 try:
     PREFIX = path.abspath(path.join(path.dirname(sys.modules["__main__"].__file__), os.pardir))
 except NameError:
@@ -71,6 +71,7 @@ VERSION = "1.0"
 WEBSITE = "http://29a.ch/httpripper/"
 
 def llabel(s):
+    """a left aligned label"""
     l = gtk.Label(s)
     l.set_property("xalign", 0.0)
     return l
@@ -80,6 +81,7 @@ def byteformatdatafunc(column, cell, model, treeiter):
     cell.set_property('text', byteformat(n))
 
 class ContentTypeFilter(gtk.ComboBox):
+    """A combobox to choose a prefix to filter mimetypes"""
     content_types = [
             ("text-x-generic", _("Any"), ""),
             ("audio-x-generic", _("Audio"), "audio"),
@@ -107,6 +109,7 @@ class ContentTypeFilter(gtk.ComboBox):
 
 
 class MainWindow(gtk.Window):
+    """the main window of httpripper"""
     def __init__(self):
         gtk.Window.__init__(self)
         self.port = 8080
@@ -132,10 +135,11 @@ class MainWindow(gtk.Window):
         self.model_sort = gtk.TreeModelSort(self.model_filtered)
         self.treeview = gtk.TreeView(self.model_sort)
         self.treeview.set_rules_hint(True)
-        #self.treeview.set_fixed_height_mode(True) # makes it a bit faster
         self.treeview.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
         self.treeview.connect("row-activated", self.save_file)
         self.treeview.set_search_column(self.model.columns.url)
+
+        # add rows
         col = self.treeview.insert_column_with_attributes(0, _("Time"),
                 gtk.CellRendererText(), text=self.model.columns.date)
         col.set_sort_column_id(self.model.columns.date)
@@ -162,7 +166,9 @@ class MainWindow(gtk.Window):
                 **({"icon_name": self.model.columns.icon}))
 
         self.vbox.pack_start(mygtk.scrolled(self.treeview))
+        #self.treeview.set_fixed_height_mode(True) # makes it a bit faster
 
+        # filtering
         self.filter_content_type = ContentTypeFilter()
         self.filter_size = gtk.Entry()
         self.filter_size.connect("changed", lambda entry: self.model_filtered.refilter())
@@ -176,6 +182,7 @@ class MainWindow(gtk.Window):
         )
         self.vbox.pack_start(self.filter_expander, False, False)
 
+        # buttons at the buttom
         self.buttonbox = gtk.HButtonBox()
         self.vbox.pack_end(self.buttonbox, False, False)
 
@@ -201,6 +208,7 @@ class MainWindow(gtk.Window):
         self.connect("destroy", gtk.main_quit)
 
     def save(self, sender):
+        """save the selected files"""
         model, rows = self.treeview.get_selection().get_selected_rows()
         if len(rows) == 1:
             self.save_file(self.treeview, rows[0], None)
@@ -208,12 +216,13 @@ class MainWindow(gtk.Window):
             self.save_files(rows)
 
     def save_files(self, rows):
+        """called to save multiple selected files"""
         model = self.model
         dialog = gtk.FileChooserDialog(
                 title=_("Save As"),
                 parent=self,
                 action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
-                buttons=(
+                buttons=(# ugly pygtk problem
                     _("Cancel").encode("utf8"), gtk.RESPONSE_CANCEL,
                     _("Save").encode("utf8"), gtk.RESPONSE_OK
                 )
@@ -227,17 +236,17 @@ class MainWindow(gtk.Window):
         dialog.destroy()
 
     def save_file(self, treeview, treepath, view_column):
+        """called to save a single file"""
         model = self.model
         row = model.get_iter(treepath)
         filepath = model.get_value(row, model.columns.path)
         url = model.get_value(row, model.columns.url)
         name = urlparse(url).path.split("/")[-1]
-        #import pdb;pdb.set_trace()
         dialog = gtk.FileChooserDialog(
                 title=_("Save As"),
                 parent=self,
                 action=gtk.FILE_CHOOSER_ACTION_SAVE,
-                buttons=(
+                buttons=( # ugly pygtk problem
                     _("Cancel").encode("utf8"), gtk.RESPONSE_CANCEL,
                     _("Save").encode("utf8"), gtk.RESPONSE_OK
                 )
@@ -259,11 +268,12 @@ class MainWindow(gtk.Window):
             size = int(self.filter_size.get_text())*1024
         except ValueError:
             size = 0
-        if size > self.model.get_value(iter_, self.model.columns.size):
+        if size and size > self.model.get_value(iter_, self.model.columns.size):
             return False
         return True
 
     def new_file(self, url, filepath, content_type):
+        """called by the proxy where there is a new file"""
         self.model.append(
                 date=datetime.datetime.now().time().strftime("%H:%M:%S"),
                 url=url,
@@ -274,6 +284,7 @@ class MainWindow(gtk.Window):
         )
 
     def clear(self, sender):
+        """clear the model and remove all files"""
         for row in self.model:
             filepath = row[self.model.columns.path]
             os.remove(filepath)
@@ -284,6 +295,7 @@ class MainWindow(gtk.Window):
         self.server.record = not self.server.record
 
     def about(self, sender):
+        """show an about dialog"""
         about = gtk.AboutDialog()
         about.set_transient_for(self)
         about.set_logo(mygtk.iconfactory.get_icon("httpripper", 128))
@@ -311,6 +323,7 @@ GNU General Public License for more details.
         about.destroy()
 
 class Tee(object):
+    """A filelike that writes it's data to two others"""
     def __init__(self, f1, f2):
         self.f1 = f1
         self.f2 = f2
@@ -320,7 +333,9 @@ class Tee(object):
         self.f2.write(data)
 
 class HTTPProxyHandler(proxpy.HTTPProxyHandler):
+    """handles a single request to the proxy"""
     def forward_response_body(self, f1, f2, contentlength):
+        """forwardes the content to the client and (if record is true) logs it"""
         if self.server.record:
             fd, name = tempfile.mkstemp(dir=self.server.tempdir)
             f3 = os.fdopen(fd, "w+b", 0)
@@ -330,7 +345,7 @@ class HTTPProxyHandler(proxpy.HTTPProxyHandler):
             self.server.on_new_file(self.url, name, self.responseheaders.get("Content-Type"))
 
 class HTTPProxyServer(proxpy.HTTPProxyServer, threading.Thread):
-
+    """accepts client connections, deletes all files on shutdown"""
     def __init__(self, mainwin):
         self.tempdir = tempfile.mkdtemp(prefix="httpripper")
         self.record = False
@@ -351,6 +366,7 @@ class HTTPProxyServer(proxpy.HTTPProxyServer, threading.Thread):
         gobject.idle_add(self.mainwin.new_file, url, filepath, content_type)
 
 def main():
+    """the entry point"""
     level = "DEBUG" in sys.argv and logging.DEBUG or logging.ERROR
     if sys.platform == "win32":
         def release_gil_on_stupid_operating_system():
@@ -367,5 +383,4 @@ def main():
     gtk.main()
 
 if __name__ == "__main__":
-
     main()

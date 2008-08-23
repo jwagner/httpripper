@@ -1,71 +1,71 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-08-21 13:07+0200\n"
+"POT-Creation-Date: 2008-08-23 10:12+0200\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../httpripper/httpripper.py:85
+#: ../httpripper/httpripper.py:86
 msgid "Any"
 msgstr "Alle"
 
-#: ../httpripper/httpripper.py:86
+#: ../httpripper/httpripper.py:87
 msgid "Audio"
 msgstr "Audio"
 
-#: ../httpripper/httpripper.py:87
+#: ../httpripper/httpripper.py:88
 msgid "Image"
 msgstr "Bild"
 
-#: ../httpripper/httpripper.py:88
+#: ../httpripper/httpripper.py:89
 msgid "Video"
 msgstr "Video"
 
-#: ../httpripper/httpripper.py:127
+#: ../httpripper/httpripper.py:129
 #, python-format
 msgid "HTTPRipper is running on localhost: %i"
 msgstr "HTTPRipper läuft auf localhost: %i"
 
-#: ../httpripper/httpripper.py:140
+#: ../httpripper/httpripper.py:143
 msgid "Time"
 msgstr "Zeit"
 
-#: ../httpripper/httpripper.py:144 ../httpripper/httpripper.py:175
+#: ../httpripper/httpripper.py:147 ../httpripper/httpripper.py:180
 msgid "Size"
 msgstr "Grösse"
 
-#: ../httpripper/httpripper.py:150 ../httpripper/httpripper.py:174
+#: ../httpripper/httpripper.py:153 ../httpripper/httpripper.py:179
 msgid "Content-Type"
 msgstr "Content-Type"
 
-#: ../httpripper/httpripper.py:156
+#: ../httpripper/httpripper.py:159
 msgid "URL"
 msgstr "URL"
 
-#: ../httpripper/httpripper.py:171
+#: ../httpripper/httpripper.py:176
 msgid "Filter"
 msgstr "Filter"
 
-#: ../httpripper/httpripper.py:174
+#: ../httpripper/httpripper.py:179
 msgid "is"
 msgstr "ist"
 
-#: ../httpripper/httpripper.py:175
+#: ../httpripper/httpripper.py:180
 msgid "at least (KiB)"
 msgstr "ist mindestens (KiB)"
 
-#: ../httpripper/httpripper.py:213 ../httpripper/httpripper.py:236
+#: ../httpripper/httpripper.py:222 ../httpripper/httpripper.py:246
 msgid "Save As"
 msgstr "Speichern unter"
 
-#: ../httpripper/httpripper.py:217 ../httpripper/httpripper.py:240
+#: ../httpripper/httpripper.py:226 ../httpripper/httpripper.py:250
 msgid "Cancel"
 msgstr "Abbrechen"
 
-#: ../httpripper/httpripper.py:218 ../httpripper/httpripper.py:241
+#: ../httpripper/httpripper.py:227 ../httpripper/httpripper.py:251
 msgid "Save"
 msgstr "Speichern"
 
-#: ../httpripper/httpripper.py:293
+#: ../httpripper/httpripper.py:306
 msgid "translator-credits"
 msgstr "Jonas Wagner"

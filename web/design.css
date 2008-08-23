@@ -24,6 +24,12 @@ a { color: #213; }
 
 a img { border: 2px solid white; -moz-border-radius: 2px; }
 
+.writtenby {
+    padding-top: 8px;
+    text-align: center;
+    font-size: 0.8em;
+}
+
 #box {
     background-image: url('box.png');
     background-color: #97bbd5;

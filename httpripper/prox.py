@@ -24,15 +24,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import SocketServer
 import socket
 from urlparse import urlparse
-
-
 import logging
+
 logger = logging
 
 socket.setdefaulttimeout(30)
 
 
 class HTTPProxyHandler(SocketServer.StreamRequestHandler):
+    """handles a connection from the client, can handle multiple requests"""
     def parse_request(self):
         """parse a request line"""
         request = ""
@@ -135,7 +135,7 @@ class HTTPProxyHandler(SocketServer.StreamRequestHandler):
 class HTTPProxyServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     allow_reuse_address = True
     daemon_threads = True
-    timeout = 60
+    timeout = 90
     request_queue_size = 10
 
     def __init__(self, addr):

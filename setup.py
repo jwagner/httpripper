@@ -15,7 +15,7 @@ def ls_r(dir):
 
 kwargs = {
       'name': 'httpripper',
-      'version': "0.1.0",
+      'version': "1.0.0",
       'description': 'A generic ripper for the web implemented as a http proxy',
       'author': 'Jonas Wagner',
       'author_email': 'veers@gmx.ch',
