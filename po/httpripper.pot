@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-08-23 10:12+0200\n"
+"POT-Creation-Date: 2008-08-31 14:13+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -65,18 +65,18 @@ msgstr ""
 msgid "at least (KiB)"
 msgstr ""
 
-#: ../httpripper/httpripper.py:222 ../httpripper/httpripper.py:246
+#: ../httpripper/httpripper.py:221 ../httpripper/httpripper.py:245
 msgid "Save As"
 msgstr ""
 
-#: ../httpripper/httpripper.py:226 ../httpripper/httpripper.py:250
+#: ../httpripper/httpripper.py:225 ../httpripper/httpripper.py:249
 msgid "Cancel"
 msgstr ""
 
-#: ../httpripper/httpripper.py:227 ../httpripper/httpripper.py:251
+#: ../httpripper/httpripper.py:226 ../httpripper/httpripper.py:250
 msgid "Save"
 msgstr ""
 
-#: ../httpripper/httpripper.py:306
+#: ../httpripper/httpripper.py:305
 msgid "translator-credits"
 msgstr ""

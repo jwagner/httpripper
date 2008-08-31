@@ -1,13 +1,25 @@
+# French translation for httpripper
+# Copyright (c) 2008 Rosetta Contributors and Canonical Ltd 2008
+# This file is distributed under the same license as the httpripper package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2008.
+#
 msgid ""
 msgstr ""
+"Project-Id-Version: httpripper\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-08-31 14:13+0200\n"
+"PO-Revision-Date: 2008-08-29 12:23+0000\n"
+"Last-Translator: Benjamin <suizo12@gmail.com>\n"
+"Language-Team: French <fr@li.org>\n"
+"MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2008-08-31 10:56+0000\n"
+"X-Generator: Launchpad (build Unknown)\n"
 
 #: ../httpripper/httpripper.py:86
 msgid "Any"
-msgstr "Alle"
+msgstr "Tous"
 
 #: ../httpripper/httpripper.py:87
 msgid "Audio"
@@ -15,28 +27,28 @@ msgstr "Audio"
 
 #: ../httpripper/httpripper.py:88
 msgid "Image"
-msgstr "Bild"
+msgstr "Image"
 
 #: ../httpripper/httpripper.py:89
 msgid "Video"
-msgstr "Video"
+msgstr "Vidéo"
 
 #: ../httpripper/httpripper.py:129
-#, python-format
+#, fuzzy, python-format
 msgid "HTTPRipper is running on localhost: %i"
-msgstr "HTTPRipper läuft auf localhost: %i"
+msgstr "HTTPRipper marche sur localhost: %i"
 
 #: ../httpripper/httpripper.py:143
 msgid "Time"
-msgstr "Zeit"
+msgstr "Temps"
 
 #: ../httpripper/httpripper.py:147 ../httpripper/httpripper.py:180
 msgid "Size"
-msgstr "Grösse"
+msgstr "Taille"
 
 #: ../httpripper/httpripper.py:153 ../httpripper/httpripper.py:179
 msgid "Content-Type"
-msgstr "Content-Type"
+msgstr "Type de contenu"
 
 #: ../httpripper/httpripper.py:159
 msgid "URL"
@@ -44,28 +56,30 @@ msgstr "URL"
 
 #: ../httpripper/httpripper.py:176
 msgid "Filter"
-msgstr "Filter"
+msgstr "Filtre"
 
 #: ../httpripper/httpripper.py:179
 msgid "is"
-msgstr "ist"
+msgstr "est"
 
 #: ../httpripper/httpripper.py:180
 msgid "at least (KiB)"
-msgstr "ist mindestens (KiB)"
+msgstr "au moins (KiB)"
 
 #: ../httpripper/httpripper.py:221 ../httpripper/httpripper.py:245
 msgid "Save As"
-msgstr "Speichern unter"
+msgstr "Enregistrer sous"
 
 #: ../httpripper/httpripper.py:225 ../httpripper/httpripper.py:249
 msgid "Cancel"
-msgstr "Abbrechen"
+msgstr "Annuler"
 
 #: ../httpripper/httpripper.py:226 ../httpripper/httpripper.py:250
 msgid "Save"
-msgstr "Speichern"
+msgstr "Enregistrer"
 
 #: ../httpripper/httpripper.py:305
 msgid "translator-credits"
-msgstr "Jonas Wagner"
+msgstr ""
+"Launchpad Contributions:\n"
+"  Benjamin https://launchpad.net/~suizo12"
