@@ -80,6 +80,15 @@ def byteformatdatafunc(column, cell, model, treeiter):
     n = int(cell.get_property('text'))
     cell.set_property('text', byteformat(n))
 
+def get_unused_filename(name):
+    if path.exists(name):
+        root, ext = path.splitext(name)
+        i = 1
+        while path.exists(root + str(i) + ext):
+            i += 1
+        return root + str(i) + ext
+    return name
+
 class ContentTypeFilter(gtk.ComboBox):
     """A combobox to choose a prefix to filter mimetypes"""
     content_types = [
@@ -231,7 +240,8 @@ class MainWindow(gtk.Window):
                 filepath = model.get_value(row, self.model.columns.path)
                 url = model.get_value(row, self.model.columns.url)
                 name = path.basename(url).split("?")[0]
-                shutil.copy(filepath, path.join(dialog.get_filename(), name))
+                dest = get_unused_filename(path.join(dialog.get_filename(), name))
+                shutil.copy(filepath, dest)
         dialog.destroy()
 
     def save_file(self, treeview, treepath, view_column):
