@@ -13,11 +13,11 @@ p {
 }
 
 ul {
-    list-style-position: outside;
+    list-style-position: inside;
 }
 
 ul ul li {
-    margin-left: 25px;
+    margin-left: 20px;
 }
 
 h3 {
