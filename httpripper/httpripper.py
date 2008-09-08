@@ -1,7 +1,5 @@
 """
 Author: Jonas Wagner
-Version: 0.1
-Last Change: 2008-08-20
 
 HTTPRipper a generic ripper for the web
 Copyright (C) 2008 Jonas Wagner
