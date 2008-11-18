@@ -64,6 +64,29 @@ except NameError:
     # frozen
     sys.stderr.write = lambda *x: None
 
+try:
+    import gconf
+except ImportError:
+    def get_proxy():
+        pass
+    def set_proxy(host, port, on):
+        pass
+else:
+    gconf_client = gconf.client_get_default()
+    def get_proxy():
+        return (
+                gconf_client.get_string("/system/http_proxy/host"),
+                gconf_client.get_int("/system/http_proxy/port"),
+                gconf_client.get_bool("/system/http_proxy/use_http_proxy")
+        )
+
+    def set_proxy(host, port, enabled):
+        return (
+                gconf_client.set_string("/system/http_proxy/host", host),
+                gconf_client.set_int("/system/http_proxy/port", port),
+                gconf_client.set_bool("/system/http_proxy/use_http_proxy", enabled)
+        )
+
 NAME = "HTTPRipper"
 VERSION = "1.0"
 WEBSITE = "http://29a.ch/httpripper/"
@@ -120,6 +143,7 @@ class MainWindow(gtk.Window):
     def __init__(self):
         gtk.Window.__init__(self)
         self.port = 8080
+        self.old_proxy = None
         while True:
             try:
                 self.server = HTTPProxyServer(self)
@@ -214,6 +238,10 @@ class MainWindow(gtk.Window):
         self.connect("destroy", lambda *args: self.server.shutdown())
         self.connect("destroy", gtk.main_quit)
 
+        host, port, enabled = get_proxy()
+        if host == "localhost" and port == self.port and enabled:
+            self.record()
+
     def save(self, sender):
         """save the selected files"""
         model, rows = self.treeview.get_selection().get_selected_rows()
@@ -297,9 +325,21 @@ class MainWindow(gtk.Window):
             os.remove(filepath)
         self.model.clear()
         self.treeview.columns_autosize()
+        if self.server.record:
+            self.record()
 
-    def record(self, sender):
+    def record(self, sender=None):
         self.server.record = not self.server.record
+        if self.server.record:
+            self.old_proxy = get_proxy()
+            set_proxy("localhost", self.port, True)
+        elif self.old_proxy:
+            host, port, enabled = get_proxy()
+            if host == "localhost" and port == self.port and enabled:
+                set_proxy(host, port, False)
+            else:
+                set_proxy(*self.old_proxy)
+
 
     def about(self, sender):
         """show an about dialog"""
