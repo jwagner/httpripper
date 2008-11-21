@@ -240,7 +240,7 @@ class MainWindow(gtk.Window):
 
         host, port, enabled = get_proxy()
         if host == "localhost" and port == self.port and enabled:
-            self.record()
+            self.button_record.set_active(True)
 
     def save(self, sender):
         """save the selected files"""
