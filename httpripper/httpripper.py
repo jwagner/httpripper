@@ -54,7 +54,7 @@ import gtk, gobject, pango
 
 from x29a import mygtk
 from x29a.utils import byteformat
-mygtk.register_webbrowser_url_hook()
+mygtk.install()
 
 import prox as proxpy
 
@@ -67,25 +67,30 @@ except NameError:
 try:
     import gconf
 except ImportError:
+    logging.debug("disabling proxy configuration")
     def get_proxy():
         pass
     def set_proxy(host, port, on):
         pass
 else:
+    logging.debug("enabling proxy configuration")
     gconf_client = gconf.client_get_default()
     def get_proxy():
-        return (
+        proxy = (
                 gconf_client.get_string("/system/http_proxy/host"),
                 gconf_client.get_int("/system/http_proxy/port"),
-                gconf_client.get_bool("/system/http_proxy/use_http_proxy")
+                gconf_client.get_bool("/system/http_proxy/use_http_proxy"),
+                gconf_client.get_string("/system/proxy/mode")
         )
+        logging.debug("get_proxy() -> %r", proxy)
+        return proxy
 
-    def set_proxy(host, port, enabled):
-        return (
-                gconf_client.set_string("/system/http_proxy/host", host),
-                gconf_client.set_int("/system/http_proxy/port", port),
-                gconf_client.set_bool("/system/http_proxy/use_http_proxy", enabled)
-        )
+    def set_proxy(host, port, enabled, mode="manual"):
+        logging.debug("set_proxy(%r, %r, %r, %r)", host, port, enabled, mode)
+        gconf_client.set_string("/system/http_proxy/host", host),
+        gconf_client.set_int("/system/http_proxy/port", port),
+        gconf_client.set_bool("/system/http_proxy/use_http_proxy", enabled)
+        gconf_client.set_string("/system/proxy/mode", mode)
 
 NAME = "HTTPRipper"
 VERSION = "1.0"
@@ -143,7 +148,6 @@ class MainWindow(gtk.Window):
     def __init__(self):
         gtk.Window.__init__(self)
         self.port = 8080
-        self.old_proxy = None
         while True:
             try:
                 self.server = HTTPProxyServer(self)
@@ -238,7 +242,7 @@ class MainWindow(gtk.Window):
         self.connect("destroy", lambda *args: self.server.shutdown())
         self.connect("destroy", gtk.main_quit)
 
-        host, port, enabled = get_proxy()
+        host, port, enabled, mode = get_proxy()
         if host == "localhost" and port == self.port and enabled:
             self.button_record.set_active(True)
 
@@ -325,16 +329,14 @@ class MainWindow(gtk.Window):
             os.remove(filepath)
         self.model.clear()
         self.treeview.columns_autosize()
-        if self.server.record:
-            self.record()
 
     def record(self, sender=None):
-        self.server.record = not self.server.record
+        self.server.record = sender.get_active()
         if self.server.record:
             self.old_proxy = get_proxy()
             set_proxy("localhost", self.port, True)
         elif self.old_proxy:
-            host, port, enabled = get_proxy()
+            host, port, enabled, mode = get_proxy()
             if host == "localhost" and port == self.port and enabled:
                 set_proxy(host, port, False)
             else:
@@ -394,13 +396,13 @@ class HTTPProxyHandler(proxpy.HTTPProxyHandler):
 class HTTPProxyServer(proxpy.HTTPProxyServer, threading.Thread):
     """accepts client connections, deletes all files on shutdown"""
     def __init__(self, mainwin):
+        threading.Thread.__init__(self)
+        proxpy.HTTPProxyServer.__init__(self, ("127.0.0.1", mainwin.port), HTTPProxyHandler)
+        self.skip_headers.append("If-")
         self.tempdir = tempfile.mkdtemp(prefix="httpripper")
         self.record = False
-        threading.Thread.__init__(self)
         self.setDaemon(True)
         self.mainwin = mainwin
-        SocketServer.TCPServer.__init__(self, ("127.0.0.1", mainwin.port),
-                HTTPProxyHandler)
 
     def run(self):
         self.serve_forever()
@@ -427,7 +429,11 @@ def main():
         gtk.gdk.threads_init()
     win = MainWindow()
     win.show_all()
-    gtk.main()
+    old_proxy = get_proxy()
+    try:
+        gtk.main()
+    finally:
+        set_proxy(*old_proxy)
 
 if __name__ == "__main__":
     main()

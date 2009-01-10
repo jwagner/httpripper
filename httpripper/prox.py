@@ -31,6 +31,7 @@ socket.setdefaulttimeout(30)
 
 class HTTPProxyHandler(SocketServer.StreamRequestHandler):
     """handles a connection from the client, can handle multiple requests"""
+
     def parse_request(self):
         """parse a request line"""
         request = ""
@@ -58,7 +59,10 @@ class HTTPProxyHandler(SocketServer.StreamRequestHandler):
         """
         logger.debug("forwarding headers %r", headers)
         for item in headers.items():
-            if not item[0].startswith("Proxy-"):
+            for header in self.server.skip_headers:
+                if item[0].startswith(header):
+                    continue
+            else:
                 f.write("%s: %s\r\n" % item)
         f.write("\r\n")
 
@@ -98,6 +102,14 @@ class HTTPProxyHandler(SocketServer.StreamRequestHandler):
             logger.exception("An error occured while handling request %r", self)
             raise
 
+    def handle_connect(self):
+        host, port = self.url.split(":")
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        s.connect((host, int(port)))
+        while True:
+            r, w, x = select([self.request, s])
+
     def _handle(self):
         """Handle client requests"""
         while True:
@@ -111,6 +123,9 @@ class HTTPProxyHandler(SocketServer.StreamRequestHandler):
                 self.forward_request_body(self.rfile, request,
                         int(self.requestheaders["Content-Length"]))
                 sock.shutdown(socket.SHUT_WR)
+            if method == "CONNECT":
+                self.handle_connect()
+                continue
             # forward status line
             self.wfile.write(request.readline())
             self.responseheaders = self.parse_header(request)
@@ -130,17 +145,51 @@ class HTTPProxyHandler(SocketServer.StreamRequestHandler):
                 break
             break
 
+
 class HTTPProxyServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     allow_reuse_address = True
     daemon_threads = True
     timeout = 90
     request_queue_size = 10
 
-    def __init__(self, addr):
-        SocketServer.TCPServer.__init__(self, addr, HTTPProxyHandler)
+    def __init__(self, addr, handler=HTTPProxyHandler):
+        SocketServer.TCPServer.__init__(self, addr, handler)
+        self.skip_headers = ["Proxy-"]
 
     def handle_error(self, request, addr):
         pass
+
+
+class HTTPProxy2ProxyHandler(HTTPProxyHandler):
+
+    def request_url(self, method, rawurl, version):
+        """create a new socket and write the requestline"""
+        request = "%s %s%s %s\r\n" % (method, rawurl, version)
+        logging.debug("request_url(%r, %r, %r) request: %r", method, rawurl, version, request)
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        s.connect(self.server.proxy_addr)
+        s.sendall(request)
+        return s, s.makefile("rwb", 0)
+
+
+class HTTPProxy2ProxyServer(HTTPProxyServer):
+
+    def __init__(self, addr, proxy_addr):
+        HTTPServer.__init__(self, addr)
+        self.skip_headers = ["Proxy-"]
+        self.proxy_addr = proxy_addr
+
+
+def make_http_proxy(addr):
+    import urllib
+    proxies = urllib.getproxies()
+    try:
+        proxy_url = proxies["http"]
+    except KeyError:
+        return HTTPProxyServer(addr)
+    url = urlparse(proxy_url)
+    return HTTPProxy2ProxyServer(addr, (url.hostname, url.port or 8080))
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
