@@ -2,7 +2,7 @@
 Author: Jonas Wagner
 
 HTTPRipper a generic ripper for the web
-Copyright (C) 2008 Jonas Wagner
+Copyright (C) 2008-2009 Jonas Wagner
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -93,7 +93,7 @@ else:
         gconf_client.set_string("/system/proxy/mode", mode)
 
 NAME = "HTTPRipper"
-VERSION = "1.0"
+VERSION = "1.0.1"
 WEBSITE = "http://29a.ch/httpripper/"
 
 def llabel(s):
@@ -353,7 +353,7 @@ class MainWindow(gtk.Window):
 #        about.set_comments("")
         about.set_authors(["Jonas Wagner"])
         about.set_translator_credits(_("translator-credits"))
-        about.set_copyright("Copyright (c) 2008 Jonas Wagner")
+        about.set_copyright("Copyright (c) 2008-2009 Jonas Wagner")
         about.set_website(WEBSITE)
         about.set_website_label(WEBSITE)
         about.set_license("""

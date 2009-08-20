@@ -3,7 +3,7 @@ A http proxy based on the SocketServer Module
 Author: Jonas Wagner
 
 HTTPRipper a generic ripper for the web
-Copyright (C) 2008 Jonas Wagner
+Copyright (C) 2008-2009 Jonas Wagner
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ import SocketServer
 import socket
 from urlparse import urlparse
 import logging
+from collections import defaultdict
 
 logger = logging
 
@@ -44,12 +45,12 @@ class HTTPProxyHandler(SocketServer.StreamRequestHandler):
     def parse_header(self, f):
         """read the httpheaders from the file like f into a dictionary"""
         logger.debug("processing headers")
-        headers = {}
+        headers = defaultdict(list)
         for line in f:
             if not line.strip():
                 break
             key, value = line.split(": ", 1)
-            headers[key] = value.strip()
+            headers[key].append(value.strip())
         return headers
 
     def write_headers(self, f, headers):
@@ -58,12 +59,13 @@ class HTTPProxyHandler(SocketServer.StreamRequestHandler):
         to the file f. Writes a newline at the end.
         """
         logger.debug("forwarding headers %r", headers)
-        for item in headers.items():
+        for name, values in headers.items():
             for header in self.server.skip_headers:
-                if item[0].startswith(header):
+                if name.startswith(header):
                     continue
             else:
-                f.write("%s: %s\r\n" % item)
+                for value in values:
+                    f.write("%s: %s\r\n" % (name, value))
         f.write("\r\n")
 
     def forward(self, f1, f2, maxlen=0):
@@ -116,12 +118,12 @@ class HTTPProxyHandler(SocketServer.StreamRequestHandler):
             method, url, version = self.parse_request()
             self.url = url
             self.requestheaders = self.parse_header(self.rfile)
-            self.requestheaders["Connection"] = "close"
+            self.requestheaders["Connection"] = ["close"]
             sock, request = self.request_url(method, url, version)
             self.write_headers(request, self.requestheaders)
             if method in ("POST", "PUT") and "Content-Length" in self.requestheaders:
                 self.forward_request_body(self.rfile, request,
-                        int(self.requestheaders["Content-Length"]))
+                        int(self.requestheaders["Content-Length"][0]))
                 sock.shutdown(socket.SHUT_WR)
             if method == "CONNECT":
                 self.handle_connect()
@@ -131,8 +133,8 @@ class HTTPProxyHandler(SocketServer.StreamRequestHandler):
             self.responseheaders = self.parse_header(request)
             self.write_headers(self.wfile, self.responseheaders)
             try:
-                clen = int(self.responseheaders.get("Content-Length"))
-            except (KeyError, TypeError, ValueError):
+                clen = int(self.responseheaders.get("Content-Length")[0])
+            except (KeyError, TypeError, ValueError, IndexError):
                 clen = None
             self.forward_response_body(request, self.wfile, clen)
             try:
@@ -141,7 +143,7 @@ class HTTPProxyHandler(SocketServer.StreamRequestHandler):
             except:
                 pass
             sock.close()
-            if self.requestheaders.get("Proxy-Connection") != "keep-alive":
+            if self.requestheaders.get("Proxy-Connection") != ["keep-alive"]:
                 break
             break
 
