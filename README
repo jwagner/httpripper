@@ -31,20 +31,18 @@ like (http://foxyproxy.mozdev.org/).
 Hacking
 =======
 If you want to hack on httpripper just clone my git repository::
-(needs git 1.5.3 or newer!)
+    http://github.com/jwagner/httpripper
 
-    $ git clone http://29a.ch/git/httpripper
-    $ cd httpripper
-    $ git submodule init
-    $ git submodule update
-    $ hack...
-    $ git diff > myfeature.patch
+And don't forget to init the submodules (needs git 1.5.3 or newer!)
+
+$ git submodule init
+$ git submodule update
 
 If you have any questions or a patch just drop me a mail.
 
 License
 =======
-Copyright (C) 2008-2009 Jonas Wagner
+Copyright (C) 2008-2010 Jonas Wagner
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

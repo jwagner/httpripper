@@ -1,12 +1,16 @@
-#, fuzzy
+# Russian translation for httpripper
+# Copyright (c) 2008 Rosetta Contributors and Canonical Ltd 2008
+# This file is distributed under the same license as the httpripper package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2008.
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: httpripper\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-08-31 14:13+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"PO-Revision-Date: 2009-11-23 11:44+0000\n"
+"Last-Translator: Oleg Koptev <koptev.oleg@gmail.com>\n"
+"Language-Team: Russian <ru@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -15,65 +19,69 @@ msgstr ""
 
 #: ../httpripper/httpripper.py:86
 msgid "Any"
-msgstr ""
+msgstr "Любой"
 
 #: ../httpripper/httpripper.py:87
 msgid "Audio"
-msgstr ""
+msgstr "Аудио"
 
 #: ../httpripper/httpripper.py:88
 msgid "Image"
-msgstr ""
+msgstr "Изображение"
 
 #: ../httpripper/httpripper.py:89
 msgid "Video"
-msgstr ""
+msgstr "Видео"
 
 #: ../httpripper/httpripper.py:129
 #, python-format
 msgid "HTTPRipper is running on localhost: %i"
-msgstr ""
+msgstr "HTTPRipper запущен на Вашем компьютере: %i"
 
 #: ../httpripper/httpripper.py:143
 msgid "Time"
-msgstr ""
+msgstr "Время"
 
 #: ../httpripper/httpripper.py:147 ../httpripper/httpripper.py:180
 msgid "Size"
-msgstr ""
+msgstr "Размер"
 
 #: ../httpripper/httpripper.py:153 ../httpripper/httpripper.py:179
 msgid "Content-Type"
-msgstr ""
+msgstr "Тип содержимого"
 
 #: ../httpripper/httpripper.py:159
 msgid "URL"
-msgstr ""
+msgstr "URL"
 
 #: ../httpripper/httpripper.py:176
 msgid "Filter"
-msgstr ""
+msgstr "Фильтр"
 
 #: ../httpripper/httpripper.py:179
 msgid "is"
-msgstr ""
+msgstr "это"
 
 #: ../httpripper/httpripper.py:180
 msgid "at least (KiB)"
-msgstr ""
+msgstr "как минимум (КБ)"
 
 #: ../httpripper/httpripper.py:221 ../httpripper/httpripper.py:245
 msgid "Save As"
-msgstr ""
+msgstr "Сохранить как"
 
 #: ../httpripper/httpripper.py:225 ../httpripper/httpripper.py:249
 msgid "Cancel"
-msgstr ""
+msgstr "Отмена"
 
 #: ../httpripper/httpripper.py:226 ../httpripper/httpripper.py:250
 msgid "Save"
-msgstr ""
+msgstr "Сохранить"
 
 #: ../httpripper/httpripper.py:305
 msgid "translator-credits"
 msgstr ""
+"Launchpad Contributions:\n"
+"  DmitryX86 https://launchpad.net/~system32\n"
+"  Oleg Koptev https://launchpad.net/~koptev-oleg\n"
+"  bvv2001 https://launchpad.net/~bvv2001"
