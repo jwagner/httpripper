@@ -52,6 +52,10 @@ gettext.translation('httpripper', LOCALE_PATH,
 
 import gtk, gobject, pango
 
+# always enable button images
+gtk.settings_get_default().set_long_property("gtk-button-images", True, "main")
+
+
 from x29a import mygtk
 from x29a.utils import byteformat
 mygtk.install()
@@ -391,7 +395,10 @@ class HTTPProxyHandler(proxpy.HTTPProxyHandler):
             f2 = Tee(f2, f3)
         self.forward(f1, f2, contentlength)
         if self.server.record:
-            self.server.on_new_file(self.url, name, self.responseheaders.get("Content-Type"))
+            content_type = self.responseheaders.get("Content-Type")
+            if content_type:
+                content_type = content_type[0]
+            self.server.on_new_file(self.url, name, content_type)
 
 class HTTPProxyServer(proxpy.HTTPProxyServer, threading.Thread):
     """accepts client connections, deletes all files on shutdown"""
