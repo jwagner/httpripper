@@ -1,8 +1,5 @@
-PYTHON=`which python`
 DESTDIR=/
-BUILDIR=$(CURDIR)/build/playitslowly
-PROJECT=playitslowly
-VERSION=1.3.0
+PROJECT=httpripper_
 
 all:
 	@echo "make source - Create source package"
@@ -12,24 +9,24 @@ all:
 	@echo "make clean - Get rid of scratch and byte files"
 
 source:
-	$(PYTHON) setup.py sdist $(COMPILE)
+	python setup.py sdist $(COMPILE)
 
 install:
-	$(PYTHON) setup.py install --root $(DESTDIR) $(COMPILE)
+	python setup.py install --root $(DESTDIR) $(COMPILE)
 
 buildrpm:
-	$(PYTHON) setup.py bdist_rpm --post-install=rpm/postinstall --pre-uninstall=rpm/preuninstall
+	python setup.py bdist_rpm --post-install=rpm/postinstall --pre-uninstall=rpm/preuninstall
 
 builddeb:
 	# build the source package in the parent directory
 	# then rename it to project_version.orig.tar.gz
-	$(PYTHON) setup.py sdist $(COMPILE) --dist-dir=../ --prune
+	python setup.py sdist $(COMPILE) --dist-dir=../ --prune
 	rename -f 's/$(PROJECT)-(.*)\.tar\.gz/$(PROJECT)_$$1\.orig\.tar\.gz/' ../*
 	# build the package
 	dpkg-buildpackage -i -I -rfakeroot
 
 clean:
-	$(PYTHON) setup.py clean
+	python setup.py clean
 	$(MAKE) -f $(CURDIR)/debian/rules clean
 	rm -rf build/ MANIFEST
 	find . -name '*.pyc' -delete
