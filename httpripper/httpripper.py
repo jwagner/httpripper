@@ -97,7 +97,7 @@ else:
         gconf_client.set_string("/system/proxy/mode", mode)
 
 NAME = "HTTP Ripper"
-VERSION = "1.1.0"
+VERSION = "1.1.1"
 WEBSITE = "http://29a.ch/httpripper/"
 
 def llabel(s):
