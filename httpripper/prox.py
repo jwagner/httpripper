@@ -25,6 +25,8 @@ from urlparse import urlparse
 import logging
 from collections import defaultdict
 
+BUFSIZE = 2**16
+
 logger = logging
 
 socket.setdefaulttimeout(30)
@@ -73,7 +75,7 @@ class HTTPProxyHandler(SocketServer.StreamRequestHandler):
         logger.debug("forwarding %r bytes", maxlen)
         left = maxlen or 1000000000
         while left:
-            data = f1.read(min(left, 1024))
+            data = f1.read(min(left, BUFSIZE))
             if not data:
                 break
             f2.write(data)
@@ -92,7 +94,7 @@ class HTTPProxyHandler(SocketServer.StreamRequestHandler):
         s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         s.connect((url.hostname, int(url.port or 80)))
         s.sendall(request)
-        return s, s.makefile("rwb", 0)
+        return s, s.makefile("rwb", BUFSIZE)
 
     def __repr__(self):
         return "HTTPProxyRequestHandler(%r)" % self.url
@@ -152,7 +154,7 @@ class HTTPProxyServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     allow_reuse_address = True
     daemon_threads = True
     timeout = 90
-    request_queue_size = 10
+    request_queue_size = 64
 
     def __init__(self, addr, handler=HTTPProxyHandler):
         SocketServer.TCPServer.__init__(self, addr, handler)
@@ -162,6 +164,7 @@ class HTTPProxyServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
         pass
 
 
+#unfinished carp
 class HTTPProxy2ProxyHandler(HTTPProxyHandler):
 
     def request_url(self, method, rawurl, version):
@@ -172,7 +175,7 @@ class HTTPProxy2ProxyHandler(HTTPProxyHandler):
         s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         s.connect(self.server.proxy_addr)
         s.sendall(request)
-        return s, s.makefile("rwb", 0)
+        return s, s.makefile("rwb", BUFSIZE)
 
 
 class HTTPProxy2ProxyServer(HTTPProxyServer):
