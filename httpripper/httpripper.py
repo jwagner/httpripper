@@ -74,7 +74,7 @@ except ImportError:
     logging.debug("disabling proxy configuration")
     def get_proxy():
         return None, None, False, None
-    def set_proxy(host, port, on):
+    def set_proxy(host, port, on, mode="manual"):
         pass
 else:
     logging.debug("enabling proxy configuration")
